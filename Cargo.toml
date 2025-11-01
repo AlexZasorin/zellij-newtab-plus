@@ -2,7 +2,7 @@
 name = "zellij-newtab-plus"
 version = "0.1.0"
 authors = ["Aleksey Zasorin <alex.zasorin@pm.me>"]
-edition = "2018"
+edition = "2024"
 
 [dependencies]
 zellij-tile = "0.43.1"

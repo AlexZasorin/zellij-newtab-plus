@@ -6,26 +6,19 @@ use std::collections::BTreeMap;
 struct State {
     new_tab_name: String,
     permissions_granted: bool,
-    tab_infos: Vec<TabInfo>,
-    pane_manifest: PaneManifest,
-    focused_tab: Option<TabInfo>,
 }
 
 register_plugin!(State);
 
 impl ZellijPlugin for State {
     fn load(&mut self, _configuration: BTreeMap<String, String>) {
+        hide_self();
         request_permission(&[
             PermissionType::Reconfigure,
             PermissionType::ReadApplicationState,
             PermissionType::ChangeApplicationState,
         ]);
-        subscribe(&[
-            EventType::Key,
-            EventType::PermissionRequestResult,
-            EventType::TabUpdate,
-            EventType::PaneUpdate,
-        ]);
+        subscribe(&[EventType::Key, EventType::PermissionRequestResult]);
     }
 
     fn update(&mut self, event: Event) -> bool {
@@ -38,20 +31,9 @@ impl ZellijPlugin for State {
                     PermissionStatus::Denied => false,
                 };
 
-                // if self.permissions_granted {
-                //     setup_plugin_pane();
-                // }
-            }
-            Event::PaneUpdate(pane_manifest) => {
-                // setup_plugin_pane();
-                self.pane_manifest = pane_manifest;
-            }
-            Event::TabUpdate(tab_infos) => {
-                self.tab_infos = tab_infos.clone();
-                let focused_tab = get_focused_tab(&tab_infos);
-
-                if let Some(tab) = focused_tab {
-                    self.focused_tab = Some(tab);
+                if self.permissions_granted {
+                    setup_plugin_pane();
+                    show_self(true);
                 }
             }
             Event::Key(key) => match key.bare_key {
@@ -65,12 +47,12 @@ impl ZellijPlugin for State {
 
                         self.new_tab_name = String::new();
                         should_render = true;
-                        hide_self();
+                        close_self();
                     }
                 }
                 BareKey::Esc => {
                     self.new_tab_name = String::new();
-                    hide_self();
+                    close_self();
                 }
                 BareKey::Backspace => {
                     if !self.new_tab_name.is_empty() {
@@ -90,33 +72,7 @@ impl ZellijPlugin for State {
     }
 
     fn render(&mut self, _rows: usize, _cols: usize) {
-        print_text_with_coordinates(Text::new(self.new_tab_name.to_string()), 0, 1, None, None);
-    }
-
-    fn pipe(&mut self, pipe_message: PipeMessage) -> bool {
-        if pipe_message.name == "new_tab" {
-            let plugin_id = get_plugin_ids().plugin_id;
-
-            let mut plugin_pane_present = false;
-            self.pane_manifest.panes.iter().for_each(|(pane_id, _)| {
-                if (*pane_id) as u32 == plugin_id {
-                    plugin_pane_present = true;
-                }
-            });
-
-            if let Some(tab) = &self.focused_tab {
-                if !plugin_pane_present {
-                    break_panes_to_tab_with_index(&[PaneId::Plugin(plugin_id)], tab.position, true);
-                }
-            }
-
-            toggle_pane_embed_or_eject();
-            setup_plugin_pane();
-
-            show_self(true);
-        }
-
-        true
+        print_text_with_coordinates(Text::new(self.new_tab_name.to_string()), 1, 0, None, None);
     }
 }
 
