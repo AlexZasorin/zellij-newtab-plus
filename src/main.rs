@@ -5,7 +5,6 @@ use std::collections::BTreeMap;
 #[derive(Debug, Default)]
 struct State {
     new_tab_name: String,
-    permissions_granted: bool,
 }
 
 register_plugin!(State);
@@ -26,12 +25,7 @@ impl ZellijPlugin for State {
 
         match event {
             Event::PermissionRequestResult(permission) => {
-                self.permissions_granted = match permission {
-                    PermissionStatus::Granted => true,
-                    PermissionStatus::Denied => false,
-                };
-
-                if self.permissions_granted {
+                if matches!(permission, PermissionStatus::Granted) {
                     setup_plugin_pane();
                     show_self(true);
                 }
