@@ -1,1 +1,41 @@
-## Zellij New-Tab Plus
+# Zellij New-Tab Plus
+
+## About
+
+This plugin allows you to name a new tab when creating it in Zellij, instead of
+having to hit another keybinding to rename it afterward. Soon, this will also
+include `zoxide` integration to quickly create tabs and navigate there.
+
+## Example Configuration
+
+```kdl
+bind "Ctrl n" {
+    LaunchOrFocusPlugin "https://github.com/AlexZasorin/zellij-newtab-plus/releases/download/v0.1.1/zellij-newtab-plus.wasm" {
+        floating true
+        move_to_focused_tab true
+    };
+}
+```
+
+You can also download the plugin binary and reference it locally:
+
+```kdl
+bind "Ctrl n" {
+    LaunchOrFocusPlugin "/path/to/zellij-newtab-plus.wasm" {
+        floating true
+        move_to_focused_tab true
+    };
+}
+```
+
+## Usage
+
+1. Press the keybinding you set up to launch the plugin (e.g., `Ctrl+n`).
+
+2. Type your desired tab name.
+
+3. Press `Enter` to create the new tab with the specified name.
+
+Additional keybinds:
+
+- `Esc`: Close the plugin.
