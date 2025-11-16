@@ -97,8 +97,5 @@ fn setup_plugin_pane() {
         }
     }
 
-    rename_pane_with_id(
-        PaneId::Plugin(plugin_id),
-        String::from("Enter new tab name:"),
-    );
+    rename_pane_with_id(PaneId::Plugin(plugin_id), String::from("New tab name:"));
 }
