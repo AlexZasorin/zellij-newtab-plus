@@ -13,7 +13,6 @@ of the zoxide query.
 bind "Ctrl n" {
     LaunchOrFocusPlugin "https://github.com/AlexZasorin/zellij-newtab-plus/releases/download/v0.1.1/zellij-newtab-plus.wasm" {
         floating true
-        move_to_focused_tab true
     };
 }
 ```
@@ -24,7 +23,6 @@ You can also download the plugin binary and reference it locally:
 bind "Ctrl n" {
     LaunchOrFocusPlugin "file:/path/to/zellij-newtab-plus.wasm" {
         floating true
-        move_to_focused_tab true
     };
 }
 ```
