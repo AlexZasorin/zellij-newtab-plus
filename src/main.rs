@@ -66,30 +66,20 @@ impl ZellijPlugin for State {
     }
 
     fn render(&mut self, _rows: usize, _cols: usize) {
-        print_text_with_coordinates(Text::new(self.new_tab_name.to_string()), 1, 0, None, None);
+        print_text_with_coordinates(Text::new(&self.new_tab_name), 1, 0, None, None);
     }
 }
 
 fn setup_plugin_pane() {
     let plugin_id = get_plugin_ids().plugin_id;
 
-    let coordinates = FloatingPaneCoordinates::new(
-        Some(String::from("40%")),
-        Some(String::from("6")),
-        Some(String::from("20%")),
-        Some(String::from("3")),
-        Some(false),
-    );
+    let coordinates = FloatingPaneCoordinates::default()
+        .with_x_percent(40)
+        .with_y_fixed(6)
+        .with_width_percent(20)
+        .with_height_fixed(3);
 
-    match coordinates {
-        None => eprintln!("Invalid floating pane coordinates."),
-        Some(floating_coordinates) => {
-            change_floating_panes_coordinates(vec![(
-                PaneId::Plugin(plugin_id),
-                floating_coordinates,
-            )]);
-        }
-    }
+    change_floating_panes_coordinates(vec![(PaneId::Plugin(plugin_id), coordinates)]);
 
-    rename_pane_with_id(PaneId::Plugin(plugin_id), String::from("New tab name:"));
+    rename_pane_with_id(PaneId::Plugin(plugin_id), "New tab name:");
 }
