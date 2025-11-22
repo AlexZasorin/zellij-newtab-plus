@@ -1,5 +1,7 @@
 # Zellij New-Tab Plus
 
+![demo](https://github.com/user-attachments/assets/3cf817c2-83b6-49c6-a0a0-4b83afc5baa6)
+
 ## About
 
 This plugin allows you to name a new tab when creating it in Zellij, instead of
