@@ -5,9 +5,8 @@
 ## About
 
 This plugin allows you to name a new tab when creating it in Zellij, instead of
-having to hit another keybinding to rename it afterward. Soon, this will also
-include `zoxide` integration to quickly create tabs and navigate to the result
-of the zoxide query.
+having to hit another keybinding to rename it afterward. If `zoxide` is
+installed, it will be used to set the directory of the new tab.
 
 ## Example Configuration
 
