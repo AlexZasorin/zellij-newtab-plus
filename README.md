@@ -13,7 +13,7 @@ of the zoxide query.
 
 ```kdl
 bind "Ctrl n" {
-    LaunchOrFocusPlugin "https://github.com/AlexZasorin/zellij-newtab-plus/releases/download/v0.1.1/zellij-newtab-plus.wasm" {
+    LaunchOrFocusPlugin "https://github.com/AlexZasorin/zellij-newtab-plus/releases/download/v0.2.0/zellij-newtab-plus.wasm" {
         floating true
     };
 }
@@ -40,3 +40,7 @@ bind "Ctrl n" {
 Additional keybinds:
 
 - `Esc`: Close the plugin.
+
+## To Do
+
+- [ ] Add configuration option to enable/disable `zoxide` navigation
