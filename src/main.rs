@@ -13,11 +13,16 @@ impl ZellijPlugin for State {
     fn load(&mut self, _configuration: BTreeMap<String, String>) {
         hide_self();
         request_permission(&[
+            PermissionType::RunCommands,
             PermissionType::Reconfigure,
             PermissionType::ReadApplicationState,
             PermissionType::ChangeApplicationState,
         ]);
-        subscribe(&[EventType::Key, EventType::PermissionRequestResult]);
+        subscribe(&[
+            EventType::Key,
+            EventType::PermissionRequestResult,
+            EventType::RunCommandResult,
+        ]);
     }
 
     fn update(&mut self, event: Event) -> bool {
@@ -30,6 +35,19 @@ impl ZellijPlugin for State {
                     show_self(true);
                 }
             }
+            Event::RunCommandResult(error_code, stdout, _stderr, context) => {
+                if context.contains_key("zoxide_query") && error_code == Some(0) {
+                    let stdout_str = String::from_utf8_lossy(&stdout);
+                    new_tab(
+                        Some(&self.new_tab_name),
+                        Some(&stdout_str.trim().to_string()),
+                    );
+                    self.new_tab_name = String::new();
+                    close_self();
+
+                    should_render = true;
+                }
+            }
             Event::Key(key) => match key.bare_key {
                 BareKey::Char(char) if char.is_ascii() => {
                     self.new_tab_name.push(char);
@@ -37,11 +55,11 @@ impl ZellijPlugin for State {
                 }
                 BareKey::Enter => {
                     if !self.new_tab_name.trim().is_empty() {
-                        new_tab(Some(&self.new_tab_name), None);
+                        let mut context = BTreeMap::new();
+                        context.insert("zoxide_query".to_string(), "true".to_string());
+                        run_command(&["zoxide", "query", &self.new_tab_name], context);
 
-                        self.new_tab_name = String::new();
                         should_render = true;
-                        close_self();
                     }
                 }
                 BareKey::Esc => {
