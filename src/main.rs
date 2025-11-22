@@ -66,7 +66,13 @@ impl ZellijPlugin for State {
     }
 
     fn render(&mut self, _rows: usize, _cols: usize) {
-        print_text_with_coordinates(Text::new(&self.new_tab_name), 1, 0, None, None);
+        print_text_with_coordinates(
+            Text::new(format!("> {}█", &self.new_tab_name)),
+            1,
+            0,
+            None,
+            None,
+        );
     }
 }
 
