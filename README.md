@@ -1,6 +1,6 @@
 # Zellij New-Tab Plus
 
-![demo](https://github.com/user-attachments/assets/3cf817c2-83b6-49c6-a0a0-4b83afc5baa6)
+![demo](https://raw.githubusercontent.com/AlexZasorin/zellij-newtab-plus/refs/heads/trunk/demo.gif)
 
 ## About
 
