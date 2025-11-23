@@ -33,6 +33,8 @@ impl ZellijPlugin for State {
                 if matches!(permission, PermissionStatus::Granted) {
                     setup_plugin_pane();
                     show_self(true);
+
+                    should_render = true;
                 }
             }
             Event::RunCommandResult(error_code, stdout, _stderr, context) => {
