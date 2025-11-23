@@ -2,6 +2,9 @@ use zellij_tile::prelude::*;
 
 use std::collections::BTreeMap;
 
+const PROMPT: &str = "> ";
+const CURSOR: char = '█';
+
 #[derive(Debug, Default)]
 struct State {
     new_tab_name: String,
@@ -86,13 +89,8 @@ impl ZellijPlugin for State {
     }
 
     fn render(&mut self, _rows: usize, _cols: usize) {
-        print_text_with_coordinates(
-            Text::new(format!("> {}█", &self.new_tab_name)),
-            1,
-            0,
-            None,
-            None,
-        );
+        let text = format!("{PROMPT}{}{CURSOR}", self.new_tab_name);
+        print_text_with_coordinates(Text::new(text), 1, 0, None, None);
     }
 }
 
