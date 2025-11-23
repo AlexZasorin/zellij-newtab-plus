@@ -41,16 +41,27 @@ impl ZellijPlugin for State {
                 }
             }
             Event::RunCommandResult(error_code, stdout, _stderr, context) => {
-                if context.contains_key("zoxide_query") && error_code == Some(0) {
-                    let stdout_str = String::from_utf8_lossy(&stdout);
-                    new_tab(
-                        Some(&self.new_tab_name),
-                        Some(&stdout_str.trim().to_string()),
-                    );
-                    self.new_tab_name = String::new();
-                    close_self();
+                if context.contains_key("zoxide_query") {
+                    if error_code == Some(0) {
+                        let stdout_str = String::from_utf8_lossy(&stdout);
+                        new_tab(
+                            Some(&self.new_tab_name),
+                            Some(&stdout_str.trim().to_string()),
+                        );
+                        self.new_tab_name = String::new();
+                        close_self();
 
-                    should_render = true;
+                        should_render = true;
+                    } else {
+                        new_tab(
+                            Some(&self.new_tab_name),
+                            None,
+                        );
+                        self.new_tab_name = String::new();
+                        close_self();
+
+                        should_render = true;
+                    }
                 }
             }
             Event::Key(key) => match key.bare_key {
