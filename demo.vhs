@@ -1,8 +1,9 @@
 Output demo.gif
 
-Set FontSize 14
-Set Width 1200
-Set Height 600
+Set Shell zsh
+Set FontSize 22
+Set Width 1920
+Set Height 1080
 Set Theme "Builtin Solarized Dark"
 Set Padding 20
 Set WindowBar Colorful
@@ -27,7 +28,7 @@ Type "n"
 Sleep 2s
 
 # Enter new tab name
-Type "my-project-tab"
+Type "my-project-folder"
 
 Sleep 2s
 
