@@ -53,10 +53,7 @@ impl ZellijPlugin for State {
 
                         should_render = true;
                     } else {
-                        new_tab(
-                            Some(&self.new_tab_name),
-                            None,
-                        );
+                        new_tab(Some(&self.new_tab_name), None);
                         self.new_tab_name = String::new();
                         close_self();
 
