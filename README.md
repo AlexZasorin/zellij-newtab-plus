@@ -12,7 +12,7 @@ installed, it will be used to set the directory of the new tab.
 
 ```kdl
 bind "Ctrl n" {
-    LaunchOrFocusPlugin "https://github.com/AlexZasorin/zellij-newtab-plus/releases/download/v0.2.0/zellij-newtab-plus.wasm" {
+    LaunchOrFocusPlugin "https://github.com/AlexZasorin/zellij-newtab-plus/releases/download/v0.2.1/zellij-newtab-plus.wasm" {
         floating true
     };
 }
