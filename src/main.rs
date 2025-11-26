@@ -67,7 +67,13 @@ impl ZellijPlugin for State {
                         if self.use_zoxide {
                             let mut context = BTreeMap::new();
                             context.insert("zoxide_query".to_string(), "true".to_string());
-                            run_command(&["zoxide", "query", &self.new_tab_name], context);
+
+                            let command: Vec<&str> = ["zoxide", "query"]
+                                .into_iter()
+                                .chain(self.new_tab_name.split_whitespace())
+                                .collect();
+
+                            run_command(&command, context);
 
                             should_render = true;
                         } else {
