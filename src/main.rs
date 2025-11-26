@@ -8,13 +8,17 @@ const CURSOR: char = '█';
 #[derive(Debug, Default)]
 struct State {
     new_tab_name: String,
+    use_zoxide: bool,
 }
 
 register_plugin!(State);
 
 impl ZellijPlugin for State {
-    fn load(&mut self, _configuration: BTreeMap<String, String>) {
+    fn load(&mut self, configuration: BTreeMap<String, String>) {
+        self.parse_configuration(configuration);
+
         hide_self();
+
         request_permission(&[
             PermissionType::RunCommands,
             PermissionType::Reconfigure,
@@ -43,20 +47,12 @@ impl ZellijPlugin for State {
             Event::RunCommandResult(error_code, stdout, _stderr, context) => {
                 if context.contains_key("zoxide_query") {
                     if error_code == Some(0) {
-                        let stdout_str = String::from_utf8_lossy(&stdout);
-                        new_tab(
-                            Some(&self.new_tab_name),
-                            Some(&stdout_str.trim().to_string()),
-                        );
-                        self.new_tab_name = String::new();
-                        close_self();
+                        let stdout_str = String::from_utf8_lossy(&stdout).trim().to_string();
+                        self.new_named_tab(Some(&stdout_str.trim().to_string()));
 
                         should_render = true;
                     } else {
-                        new_tab(Some(&self.new_tab_name), None);
-                        self.new_tab_name = String::new();
-                        close_self();
-
+                        self.new_named_tab(None);
                         should_render = true;
                     }
                 }
@@ -68,11 +64,16 @@ impl ZellijPlugin for State {
                 }
                 BareKey::Enter => {
                     if !self.new_tab_name.trim().is_empty() {
-                        let mut context = BTreeMap::new();
-                        context.insert("zoxide_query".to_string(), "true".to_string());
-                        run_command(&["zoxide", "query", &self.new_tab_name], context);
+                        if self.use_zoxide {
+                            let mut context = BTreeMap::new();
+                            context.insert("zoxide_query".to_string(), "true".to_string());
+                            run_command(&["zoxide", "query", &self.new_tab_name], context);
 
-                        should_render = true;
+                            should_render = true;
+                        } else {
+                            self.new_named_tab(None);
+                            should_render = true;
+                        }
                     }
                 }
                 BareKey::Esc => {
@@ -99,6 +100,20 @@ impl ZellijPlugin for State {
     fn render(&mut self, _rows: usize, _cols: usize) {
         let text = format!("{PROMPT}{}{CURSOR}", self.new_tab_name);
         print_text_with_coordinates(Text::new(text), 1, 0, None, None);
+    }
+}
+
+impl State {
+    fn parse_configuration(&mut self, configuration: BTreeMap<String, String>) {
+        self.use_zoxide = configuration
+            .get("use_zoxide")
+            .is_some_and(|v| v.to_lowercase() == "true");
+    }
+
+    fn new_named_tab(&mut self, cwd: Option<&String>) {
+        new_tab(Some(&self.new_tab_name), cwd);
+        self.new_tab_name = String::new();
+        close_self();
     }
 }
 
