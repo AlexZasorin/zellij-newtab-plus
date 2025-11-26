@@ -7,11 +7,13 @@
 This plugin allows you to quickly name a new tab when creating it and to set
 it's directory using `zoxide`.
 
+Requires Zellij >= 0.43.1.
+
 ## Example Configuration
 
 ```kdl
 bind "Ctrl n" {
-    LaunchOrFocusPlugin "https://github.com/AlexZasorin/zellij-newtab-plus/releases/download/v0.2.1/zellij-newtab-plus.wasm" {
+    LaunchOrFocusPlugin "https://github.com/AlexZasorin/zellij-newtab-plus/releases/download/v0.3.0/zellij-newtab-plus.wasm" {
         floating true
 
         use_zoxide true
@@ -37,7 +39,7 @@ switch back to normal mode after launching the plugin:
 ```kdl
 tab {
     bind "n" {
-        LaunchOrFocusPlugin "https://github.com/AlexZasorin/zellij-newtab-plus/releases/download/v0.2.1/zellij-newtab-plus.wasm" {
+        LaunchOrFocusPlugin "https://github.com/AlexZasorin/zellij-newtab-plus/releases/download/v0.3.0/zellij-newtab-plus.wasm" {
             floating true
 
             use_zoxide true
@@ -58,7 +60,3 @@ tab {
 Additional keybinds:
 
 - `Esc`: Close the plugin.
-
-## To Do
-
-- [ ] Add configuration option to enable/disable `zoxide` navigation
