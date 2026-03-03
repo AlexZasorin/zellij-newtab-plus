@@ -5,4 +5,5 @@ authors = ["Aleksey Zasorin <alex.zasorin@pm.me>"]
 edition = "2024"
 
 [dependencies]
+regex = "1.12.3"
 zellij-tile = "0.43.1"

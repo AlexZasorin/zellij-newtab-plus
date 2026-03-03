@@ -1,8 +1,8 @@
-use zellij_tile::prelude::*;
-
 use crate::ui::setup_plugin_pane;
 use crate::ui::{CURSOR, PROMPT};
+use regex::Regex;
 use std::collections::BTreeMap;
+use zellij_tile::prelude::*;
 
 #[derive(Debug, Default)]
 pub struct State {
@@ -54,6 +54,12 @@ impl ZellijPlugin for State {
                 }
             }
             Event::Key(key) => match key.bare_key {
+                BareKey::Char('c') | BareKey::Char('d')
+                    if key.has_modifiers(&[KeyModifier::Ctrl]) =>
+                {
+                    self.new_tab_name = String::new();
+                    close_self();
+                }
                 BareKey::Char(char) if char.is_ascii() => {
                     self.new_tab_name.push(char);
                     should_render = true;
@@ -81,6 +87,12 @@ impl ZellijPlugin for State {
                 BareKey::Esc => {
                     self.new_tab_name = String::new();
                     close_self();
+                }
+                BareKey::Backspace if key.has_modifiers(&[KeyModifier::Alt]) => {
+                    let re = Regex::new(r"\b(\w+|[^\w\s])\s*$").unwrap();
+                    self.new_tab_name = re.replace(&self.new_tab_name, "").to_string();
+
+                    should_render = true;
                 }
                 BareKey::Backspace => {
                     if !self.new_tab_name.is_empty() {
