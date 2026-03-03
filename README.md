@@ -13,7 +13,7 @@ Requires Zellij >= 0.43.1.
 
 ```kdl
 bind "Ctrl n" {
-    LaunchOrFocusPlugin "https://github.com/AlexZasorin/zellij-newtab-plus/releases/download/v0.3.0/zellij-newtab-plus.wasm" {
+    LaunchOrFocusPlugin "https://github.com/AlexZasorin/zellij-newtab-plus/releases/download/v0.4.0/zellij-newtab-plus.wasm" {
         floating true
 
         use_zoxide true
@@ -39,7 +39,7 @@ switch back to normal mode after launching the plugin:
 ```kdl
 tab {
     bind "n" {
-        LaunchOrFocusPlugin "https://github.com/AlexZasorin/zellij-newtab-plus/releases/download/v0.3.0/zellij-newtab-plus.wasm" {
+        LaunchOrFocusPlugin "https://github.com/AlexZasorin/zellij-newtab-plus/releases/download/v0.4.0/zellij-newtab-plus.wasm" {
             floating true
 
             use_zoxide true
