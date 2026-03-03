@@ -59,4 +59,5 @@ tab {
 
 Additional keybinds:
 
-- `Esc`: Close the plugin.
+- `Esc`, `Ctrl + c`, or `Ctrl + d`: Close the plugin.
+- `Alt + Backspace`: Delete previous word.
