@@ -1,5 +1,7 @@
-use crate::ui::setup_plugin_pane;
-use crate::ui::{CURSOR, PROMPT};
+use crate::{
+    history::History,
+    ui::{CURSOR, PROMPT, setup_plugin_pane},
+};
 use regex::Regex;
 use std::collections::BTreeMap;
 use zellij_tile::prelude::*;
@@ -8,6 +10,9 @@ use zellij_tile::prelude::*;
 pub struct State {
     new_tab_name: String,
     use_zoxide: bool,
+    history: Option<History>,
+    history_idx: usize,
+    stashed_input: Option<String>,
 }
 
 impl ZellijPlugin for State {
@@ -27,6 +32,14 @@ impl ZellijPlugin for State {
             EventType::PermissionRequestResult,
             EventType::RunCommandResult,
         ]);
+
+        self.history = match History::new() {
+            Ok(history) => Some(history),
+            Err(e) => {
+                eprintln!("Failed to load history: {e}");
+                return;
+            }
+        }
     }
 
     fn update(&mut self, event: Event) -> bool {
@@ -82,6 +95,9 @@ impl ZellijPlugin for State {
                             self.new_named_tab(None);
                             should_render = true;
                         }
+
+                        self.stashed_input = None;
+                        self.history_idx = 0;
                     }
                 }
                 BareKey::Esc => {
@@ -99,6 +115,50 @@ impl ZellijPlugin for State {
                         self.new_tab_name.truncate(self.new_tab_name.len() - 1);
                         should_render = true;
                     }
+                }
+                BareKey::Up => {
+                    let entries = match &self.history {
+                        Some(contents) => contents.entries(),
+                        None => {
+                            return false;
+                        }
+                    };
+
+                    if entries.is_empty() {
+                        return false;
+                    }
+
+                    if self.stashed_input.is_some() {
+                        self.history_idx = (self.history_idx + 1).min(entries.len() - 1);
+                    } else {
+                        self.stashed_input = Some(self.new_tab_name.clone());
+                    }
+
+                    self.new_tab_name = entries[entries.len() - self.history_idx - 1].clone();
+
+                    should_render = true;
+                }
+                BareKey::Down => {
+                    let entries = match &self.history {
+                        Some(contents) => contents.entries(),
+                        None => {
+                            return false;
+                        }
+                    };
+
+                    if entries.is_empty() || self.stashed_input.is_none() {
+                        return false;
+                    }
+
+                    if self.history_idx == 0 {
+                        self.new_tab_name = self.stashed_input.take().unwrap_or_default();
+                        return true;
+                    }
+
+                    self.history_idx = self.history_idx.saturating_sub(1);
+                    self.new_tab_name = entries[entries.len() - self.history_idx - 1].clone();
+
+                    should_render = true;
                 }
                 _ => {}
             },
@@ -126,7 +186,13 @@ impl State {
 
     fn new_named_tab(&mut self, cwd: Option<&String>) {
         new_tab(Some(&self.new_tab_name), cwd);
+
+        if let Some(history) = &mut self.history {
+            history.push(self.new_tab_name.trim());
+        };
+
         self.new_tab_name = String::new();
+
         close_self();
     }
 }

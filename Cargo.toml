@@ -1,9 +1,10 @@
 [package]
 name = "zellij-newtab-plus"
-version = "0.1.0"
+version = "0.4.0"
 authors = ["Aleksey Zasorin <alex.zasorin@pm.me>"]
 edition = "2024"
 
 [dependencies]
+indexmap = "2.13.0"
 regex = "1.12.3"
 zellij-tile = "0.43.1"
