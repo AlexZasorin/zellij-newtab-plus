@@ -1,18 +1,14 @@
 use crate::{
-    history::History,
+    input_state::InputState,
     ui::{CURSOR, PROMPT, setup_plugin_pane},
 };
-use regex::Regex;
 use std::collections::BTreeMap;
 use zellij_tile::prelude::*;
 
 #[derive(Debug, Default)]
 pub struct State {
-    new_tab_name: String,
     use_zoxide: bool,
-    history: Option<History>,
-    history_idx: usize,
-    stashed_input: Option<String>,
+    input: InputState,
 }
 
 impl ZellijPlugin for State {
@@ -32,14 +28,6 @@ impl ZellijPlugin for State {
             EventType::PermissionRequestResult,
             EventType::RunCommandResult,
         ]);
-
-        self.history = match History::new() {
-            Ok(history) => Some(history),
-            Err(e) => {
-                eprintln!("Failed to load history: {e}");
-                return;
-            }
-        }
     }
 
     fn update(&mut self, event: Event) -> bool {
@@ -70,22 +58,23 @@ impl ZellijPlugin for State {
                 BareKey::Char('c') | BareKey::Char('d')
                     if key.has_modifiers(&[KeyModifier::Ctrl]) =>
                 {
-                    self.new_tab_name = String::new();
+                    self.input.clear_name();
                     close_self();
                 }
                 BareKey::Char(char) if char.is_ascii() => {
-                    self.new_tab_name.push(char);
+                    self.input.add_char(char);
                     should_render = true;
                 }
                 BareKey::Enter => {
-                    if !self.new_tab_name.trim().is_empty() {
+                    if !self.input.new_tab_name().trim().is_empty() {
                         if self.use_zoxide {
                             let mut context = BTreeMap::new();
                             context.insert("zoxide_query".to_string(), "true".to_string());
 
+                            let tab_name = self.input.new_tab_name();
                             let command: Vec<&str> = ["zoxide", "query"]
                                 .into_iter()
-                                .chain(self.new_tab_name.split_whitespace())
+                                .chain(tab_name.split_whitespace())
                                 .collect();
 
                             run_command(&command, context);
@@ -96,69 +85,26 @@ impl ZellijPlugin for State {
                             should_render = true;
                         }
 
-                        self.stashed_input = None;
-                        self.history_idx = 0;
+                        self.input.reset_state();
                     }
                 }
                 BareKey::Esc => {
-                    self.new_tab_name = String::new();
+                    self.input.clear_name();
                     close_self();
                 }
                 BareKey::Backspace if key.has_modifiers(&[KeyModifier::Alt]) => {
-                    let re = Regex::new(r"\b(\w+|[^\w\s])\s*$").unwrap();
-                    self.new_tab_name = re.replace(&self.new_tab_name, "").to_string();
+                    self.input.delete_prev_word();
 
                     should_render = true;
                 }
                 BareKey::Backspace => {
-                    if !self.new_tab_name.is_empty() {
-                        self.new_tab_name.truncate(self.new_tab_name.len() - 1);
-                        should_render = true;
-                    }
+                    should_render = self.input.del_char();
                 }
                 BareKey::Up => {
-                    let entries = match &self.history {
-                        Some(contents) => contents.entries(),
-                        None => {
-                            return false;
-                        }
-                    };
-
-                    if entries.is_empty() {
-                        return false;
-                    }
-
-                    if self.stashed_input.is_some() {
-                        self.history_idx = (self.history_idx + 1).min(entries.len() - 1);
-                    } else {
-                        self.stashed_input = Some(self.new_tab_name.clone());
-                    }
-
-                    self.new_tab_name = entries[entries.len() - self.history_idx - 1].clone();
-
-                    should_render = true;
+                    should_render = self.input.up();
                 }
                 BareKey::Down => {
-                    let entries = match &self.history {
-                        Some(contents) => contents.entries(),
-                        None => {
-                            return false;
-                        }
-                    };
-
-                    if entries.is_empty() || self.stashed_input.is_none() {
-                        return false;
-                    }
-
-                    if self.history_idx == 0 {
-                        self.new_tab_name = self.stashed_input.take().unwrap_or_default();
-                        return true;
-                    }
-
-                    self.history_idx = self.history_idx.saturating_sub(1);
-                    self.new_tab_name = entries[entries.len() - self.history_idx - 1].clone();
-
-                    should_render = true;
+                    should_render = self.input.down();
                 }
                 _ => {}
             },
@@ -172,7 +118,7 @@ impl ZellijPlugin for State {
     }
 
     fn render(&mut self, _rows: usize, _cols: usize) {
-        let text = format!("{PROMPT}{}{CURSOR}", self.new_tab_name);
+        let text = format!("{PROMPT}{}{CURSOR}", self.input.new_tab_name());
         print_text_with_coordinates(Text::new(text), 1, 0, None, None);
     }
 }
@@ -185,13 +131,10 @@ impl State {
     }
 
     fn new_named_tab(&mut self, cwd: Option<&String>) {
-        new_tab(Some(&self.new_tab_name), cwd);
+        new_tab(Some(&self.input.new_tab_name().to_string()), cwd);
 
-        if let Some(history) = &mut self.history {
-            history.push(self.new_tab_name.trim());
-        };
-
-        self.new_tab_name = String::new();
+        self.input.push_history();
+        self.input.clear_name();
 
         close_self();
     }

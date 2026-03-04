@@ -1,4 +1,4 @@
-mod history;
+mod input_state;
 mod state;
 mod ui;
 
