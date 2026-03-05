@@ -13,9 +13,9 @@ Requires Zellij >= 0.43.1.
 
 - `zoxide` integration to navigate new tabs based on name
 - Tab name history (like shell history!)
-  - NOTE: The latest version of Zellij (0.43.1) (contains a bug that causes
+  - NOTE: The latest version of Zellij (0.43.1) [contains a bug that causes
     the history to NOT persist across Zellij sessions. This is fixed on
-    Zellij main and will be included in the next (0.44.0) release)[https://github.com/zellij-org/zellij/issues/4776#issuecomment-3986803120].
+    Zellij main and will be included in the next (0.44.0) release](https://github.com/zellij-org/zellij/issues/4776#issuecomment-3986803120).
 - Convenient keybinds
 
 ## Example Configuration
