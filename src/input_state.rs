@@ -108,7 +108,7 @@ impl InputState {
 
         if self.index == 0 {
             self.new_tab_name = self.stashed_input.take().unwrap_or_default();
-            return false;
+            return true;
         }
 
         self.index = self.index.saturating_sub(1);
