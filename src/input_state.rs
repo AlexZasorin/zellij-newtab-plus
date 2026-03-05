@@ -19,6 +19,10 @@ pub struct InputState {
 }
 
 impl InputState {
+    pub fn new_tab_name(&self) -> &str {
+        &self.new_tab_name
+    }
+
     pub fn add_char(&mut self, ch: char) {
         self.new_tab_name.push(ch)
     }
@@ -31,6 +35,15 @@ impl InputState {
         }
 
         false
+    }
+
+    pub fn delete_prev_word(&mut self) {
+        let re = Regex::new(r"\b(\w+|[^\w\s])\s*$").unwrap();
+        self.new_tab_name = re.replace(&self.new_tab_name, "").to_string();
+    }
+
+    pub fn clear_name(&mut self) {
+        self.new_tab_name = String::new();
     }
 
     pub fn push_history(&mut self) -> bool {
@@ -72,24 +85,6 @@ impl InputState {
         true
     }
 
-    pub fn new_tab_name(&self) -> &str {
-        &self.new_tab_name
-    }
-
-    pub fn clear_name(&mut self) {
-        self.new_tab_name = String::new();
-    }
-
-    pub fn reset_state(&mut self) {
-        self.stashed_input = None;
-        self.index = 0;
-    }
-
-    pub fn delete_prev_word(&mut self) {
-        let re = Regex::new(r"\b(\w+|[^\w\s])\s*$").unwrap();
-        self.new_tab_name = re.replace(&self.new_tab_name, "").to_string();
-    }
-
     pub fn up(&mut self) -> bool {
         if self.history.is_empty() {
             return false;
@@ -120,6 +115,11 @@ impl InputState {
         self.new_tab_name = self.history[self.history.len() - self.index - 1].clone();
 
         true
+    }
+
+    pub fn reset_state(&mut self) {
+        self.stashed_input = None;
+        self.index = 0;
     }
 }
 
