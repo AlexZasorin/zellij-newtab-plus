@@ -61,6 +61,12 @@ impl ZellijPlugin for State {
                     self.input.clear_name();
                     close_self();
                 }
+                BareKey::Char('d') if key.has_modifiers(&[KeyModifier::Alt]) => {
+                    self.input.delete_entry();
+
+                    dbg!("Should have deleted!");
+                    should_render = true;
+                }
                 BareKey::Char(char) if char.is_ascii() => {
                     self.input.add_char(char);
                     should_render = true;

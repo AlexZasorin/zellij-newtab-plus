@@ -50,6 +50,7 @@ impl InputState {
         if self.history.contains(self.new_tab_name.trim()) {
             self.history.shift_remove(self.new_tab_name.trim());
         }
+
         self.history.insert(self.new_tab_name.trim().to_string());
 
         if !self.loaded_history {
@@ -83,6 +84,53 @@ impl InputState {
         };
 
         true
+    }
+
+    pub fn delete_entry(&mut self) {
+        if self.stashed_input.is_none() {
+            dbg!("Stashed input is none");
+            self.clear_name();
+            return;
+        }
+
+        if self.index == 0 {
+            self.new_tab_name = self.stashed_input.take().unwrap_or_default();
+            self.history.shift_remove_index(self.index);
+        } else {
+            self.history
+                .shift_remove_index(self.history.len() - self.index - 1);
+            self.index = (self.index).min(self.history.len() - 1);
+            self.new_tab_name = self.history[self.history.len() - self.index - 1].clone();
+        }
+
+        if !self.loaded_history {
+            return;
+        }
+
+        let mut file = match OpenOptions::new()
+            .create(true)
+            .write(true)
+            .truncate(true)
+            .open(&self.path)
+        {
+            Ok(contents) => contents,
+            Err(e) => {
+                eprintln!("Failed to open history file: {e}");
+                return;
+            }
+        };
+
+        match file.write_all(
+            self.history
+                .iter()
+                .fold(String::new(), |acc, x| acc + x + "\n")
+                .as_bytes(),
+        ) {
+            Ok(_) => {}
+            Err(e) => {
+                eprintln!("Failed to write to history file: {e}");
+            }
+        };
     }
 
     pub fn up(&mut self) -> bool {
