@@ -5,7 +5,7 @@ use crate::{
 use std::collections::BTreeMap;
 use zellij_tile::prelude::*;
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct State {
     use_zoxide: bool,
     input: InputState,
@@ -126,6 +126,16 @@ impl ZellijPlugin for State {
     fn render(&mut self, _rows: usize, _cols: usize) {
         let text = format!("{PROMPT}{}{CURSOR}", self.input.new_tab_name());
         print_text_with_coordinates(Text::new(text), 1, 0, None, None);
+    }
+}
+
+impl Default for State {
+    fn default() -> State {
+        let input_state = InputState::init().unwrap_or_default();
+        State {
+            use_zoxide: false,
+            input: input_state,
+        }
     }
 }
 

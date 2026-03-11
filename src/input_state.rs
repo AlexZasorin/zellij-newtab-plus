@@ -2,7 +2,7 @@ use indexmap::IndexSet;
 use regex::Regex;
 use std::{
     fs::{self, OpenOptions},
-    io::{Read, Write},
+    io::{Error, Read, Write},
     path::PathBuf,
 };
 
@@ -19,6 +19,30 @@ pub struct InputState {
 }
 
 impl InputState {
+    pub fn init() -> Result<InputState, Error> {
+        fs::create_dir_all("/cache/zellij-newtab-plus")?;
+
+        let mut file = OpenOptions::new()
+            .create(true)
+            .truncate(false)
+            .read(true)
+            .open("/cache/zellij-newtab-plus/history")?;
+
+        let mut raw_history: String = String::new();
+        file.read_to_string(&mut raw_history)?;
+
+        let entries: IndexSet<String> = raw_history.lines().map(|s| s.to_string()).collect();
+
+        Ok(InputState {
+            new_tab_name: String::new(),
+            stashed_input: None,
+            history: entries,
+            index: 0,
+            path: PathBuf::from("/cache/zellij-newtab-plus/history"),
+            loaded_history: true,
+        })
+    }
+
     pub fn new_tab_name(&self) -> &str {
         &self.new_tab_name
     }
@@ -172,33 +196,14 @@ impl InputState {
 }
 
 impl Default for InputState {
-    fn default() -> InputState {
-        let _ = fs::create_dir_all("/cache/zellij-newtab-plus");
-
-        let mut file_result = OpenOptions::new()
-            .create(true)
-            .truncate(false)
-            .read(true)
-            .open("/cache/zellij-newtab-plus/history");
-
-        let mut loaded_history = false;
-        let mut raw_history: String = String::new();
-        if let Ok(file) = &mut file_result {
-            let read_result = file.read_to_string(&mut raw_history);
-            if read_result.is_ok() {
-                loaded_history = true;
-            }
-        }
-
-        let entries: IndexSet<String> = raw_history.lines().map(|s| s.to_string()).collect();
-
+    fn default() -> Self {
         InputState {
             new_tab_name: String::new(),
             stashed_input: None,
-            history: entries,
+            history: IndexSet::new(),
             index: 0,
-            path: PathBuf::from("/cache/zellij-newtab-plus/history"),
-            loaded_history,
+            path: PathBuf::new(),
+            loaded_history: false,
         }
     }
 }
