@@ -124,7 +124,11 @@ impl InputState {
             self.history
                 .shift_remove_index(self.history.len() - self.index - 1);
             self.index = (self.index).min(self.history.len() - 1);
-            self.new_tab_name = self.history[self.history.len() - self.index - 1].clone();
+            self.new_tab_name = self
+                .history
+                .get_index(self.history.len() - self.index - 1)
+                .expect("index should never be out-of-bounds")
+                .clone();
         }
 
         if !self.loaded_history {
@@ -168,7 +172,11 @@ impl InputState {
             self.stashed_input = Some(self.new_tab_name.clone());
         }
 
-        self.new_tab_name = self.history[self.history.len() - self.index - 1].clone();
+        self.new_tab_name = self
+            .history
+            .get_index(self.history.len() - self.index - 1)
+            .expect("index should never be out-of-bounds")
+            .clone();
 
         true
     }
