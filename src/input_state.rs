@@ -9,12 +9,12 @@ use std::{
 #[derive(Debug)]
 pub struct InputState {
     new_tab_name: String,
-    // Current tab name is stashed here while browsing history
+    /// Current tab name is stashed here while browsing history
     stashed_input: Option<String>,
     history: IndexSet<String>,
     index: usize,
     path: PathBuf,
-    // If we fail to load the history for a session, we want to avoid trying to write to the file
+    /// If we fail to load the history for a session, we want to avoid trying to write to the file
     loaded_history: bool,
 }
 
