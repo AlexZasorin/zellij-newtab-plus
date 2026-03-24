@@ -64,7 +64,6 @@ impl ZellijPlugin for State {
                 BareKey::Char('d') if key.has_modifiers(&[KeyModifier::Alt]) => {
                     self.input.delete_entry();
 
-                    dbg!("Should have deleted!");
                     should_render = true;
                 }
                 BareKey::Char(char) if char.is_ascii() => {
@@ -72,27 +71,25 @@ impl ZellijPlugin for State {
                     should_render = true;
                 }
                 BareKey::Enter => {
-                    if !self.input.new_tab_name().trim().is_empty() {
-                        if self.use_zoxide {
-                            let mut context = BTreeMap::new();
-                            context.insert("zoxide_query".to_string(), "true".to_string());
+                    if !self.input.new_tab_name().trim().is_empty() && self.use_zoxide {
+                        let mut context = BTreeMap::new();
+                        context.insert("zoxide_query".to_string(), "true".to_string());
 
-                            let tab_name = self.input.new_tab_name();
-                            let command: Vec<&str> = ["zoxide", "query"]
-                                .into_iter()
-                                .chain(tab_name.split_whitespace())
-                                .collect();
+                        let tab_name = self.input.new_tab_name();
+                        let command: Vec<&str> = ["zoxide", "query"]
+                            .into_iter()
+                            .chain(tab_name.split_whitespace())
+                            .collect();
 
-                            run_command(&command, context);
+                        run_command(&command, context);
 
-                            should_render = true;
-                        } else {
-                            self.new_named_tab(None);
-                            should_render = true;
-                        }
-
-                        self.input.reset_state();
+                        return true;
                     }
+
+                    self.new_named_tab(None);
+                    should_render = true;
+
+                    self.input.reset_state();
                 }
                 BareKey::Esc => {
                     self.input.clear_name();
@@ -147,9 +144,13 @@ impl State {
     }
 
     fn new_named_tab(&mut self, cwd: Option<&String>) {
-        new_tab(Some(&self.input.new_tab_name().to_string()), cwd);
+        if self.input.new_tab_name().to_string().trim().is_empty() {
+            new_tab::<String>(None, None);
+        } else {
+            new_tab(Some(&self.input.new_tab_name().to_string()), cwd);
+            self.input.push_history();
+        }
 
-        self.input.push_history();
         self.input.clear_name();
 
         close_self();
